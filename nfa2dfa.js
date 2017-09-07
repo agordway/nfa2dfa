@@ -10,20 +10,98 @@ Adam Ordway
 
 
 var data = new Object;          // Holds all input file data
+var dfa = new Object;
+
+dfa.states = [];
 
 main = function(){
 	console.log("reading NFA ... done.\n");
 	console.log("creating corresponding DFA ...");
 	
-	var todoStates = [data.initialState];
-	
-	while(todoStates.length > 0){
-		
+	findE();
+	//console.log(JSON.stringify(dfa));
+	var bool = true;
+	while(bool){
+		bool = getTranStates();
 	}
+
+	console.log("done.");
 
 }
 
-getTranStates = function(state){
+findE = function(state){
+	console.log('In Function  ----   ');
+	var result = [];
+	var touched = [];
+	if(dfa.states.length == 0){
+		console.log("frist");
+		if(data.states[0].E){
+			var a = [data.initialState]; 
+			var tmp = {
+				s: a.concat(data.states[0].E),
+				touch: false
+			};
+			addState(tmp);
+		}else{
+			var tmp = {
+				s: [ data.initialState ],
+				touch: false
+			};
+			addState(tmp);
+		}
+	}else if(state && state.E){
+		console.log(state.E);
+		result = result.concat(state.E);
+		for(var i = 0; i < result.length; i++){
+			result = result.concat(findE(data.states[result[i]-1]));
+		}
+		return result;
+	}
+}
+
+addState = function(state){
+	dfa.states.push(state);
+	console.log("new DFA state:\t" + dfa.states.length + "\t-->\t{" + dfa.states[dfa.states.length - 1].s + "}");
+}
+
+getTranStates = function(){
+	for(var i = 0; i < dfa.states.length; i++){
+		if(!dfa.states[i].touch){
+			if(dfa.states[i].s){
+			var result = [];
+			//loop through state list
+			for(var j = 0; j < dfa.states[i].s.length; j++){
+				for(var k = 0; k < data.transitionTypes.length-1; k++){
+					if(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]){
+						var s = data.states[dfa.states[i].s[j]-1].E;
+						console.log("###  " + s);
+						var eList = findE(data.states[dfa.states[i].s[j]-1]);
+						//var eList = findE(dfa.states.s[j]-1);
+						result.push(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
+						//if(eList.length > 0){
+							result = result.concat(eList);
+							console.log(eList + "     +++++++");
+						//}
+					}
+				}
+			}
+			for(var l = 0; l < result.length; l++){
+				var tmp = {
+					s: result[l],
+					touch: false
+				};
+				addState(tmp);
+			}
+			dfa.states[i].touch = true;
+			}
+		}else{
+			return false;
+		}
+	}
+	return true;
+}
+
+printDFA = function(){
 	
 }
 
