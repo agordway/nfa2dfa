@@ -53,12 +53,14 @@ findE = function(state){
 			addState(tmp);
 		}
 	}else if(state){
-
+		console.log("inner");
 		result.push(state);
-
 		for(var i = 0; i < result.length; i++){
+			console.log("inner - 1");
 			if(data.states[result[i]-1].E){
+				console.log("inner - 1: if");
 				for(var j = 0; j < data.states[result[i]-1].E.length; j++){
+					console.log("inner - 2");
 					result = result.concat(data.states[result[i]-1].E[j]);
 				}
 			}
@@ -89,7 +91,7 @@ addState = function(state){
 }
 
 getTranStates = function(){
-	for(var i = 0; i < dfa.states.length; i++){
+	for(var i = 0; dfa.states.length < data.totalStates; i++){
 		console.log("______ DFA States Loop ______");
 		if(!dfa.states[i].touch){
 			if(dfa.states[i].s){
