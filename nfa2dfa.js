@@ -13,31 +13,32 @@ var data = new Object;          // Holds all input file data
 var dfa = new Object;
 
 dfa.states = [];
+dfa.seen = [];
 
 main = function(){
 	console.log("reading NFA ... done.\n");
 	console.log("creating corresponding DFA ...");
 	
 	findE();
-	console.log(JSON.stringify(data));
+	//console.log(JSON.stringify(data));
 	var bool = true;
-	//while(bool){
-		console.log("##############################");
-		console.log("Main Loop");
-		console.log("##############################");
+	while(bool){
+		//console.log("##############################");
+		//console.log("Main Loop");
+		//console.log("##############################");
 		bool = getTranStates();
-	//}
+	}
 
 	console.log("done.");
 
 }
 
 findE = function(state){
-	console.log('  ----  In FindE  ----  ');
+	//console.log('  ----  In FindE  ----  ');
 	var result = [];
 	var touched = [];
 	if(dfa.states.length == 0){
-		console.log("+ init state +");
+		//console.log("+ init state +");
 		if(data.states[0].E){
 			var a = [data.initialState]; 
 			var tmp = {
@@ -53,15 +54,20 @@ findE = function(state){
 			addState(tmp);
 		}
 	}else if(state){
-		console.log("inner");
+		//console.log("inner");
 		result.push(state);
 		for(var i = 0; i < result.length; i++){
-			console.log("inner - 1");
+			//console.log("inner - 1");
 			if(data.states[result[i]-1].E){
-				console.log("inner - 1: if");
+				//console.log("inner - 1: if");
 				for(var j = 0; j < data.states[result[i]-1].E.length; j++){
-					console.log("inner - 2");
-					result = result.concat(data.states[result[i]-1].E[j]);
+					//console.log("inner - 2");
+					if(!result.includes(data.states[result[i]-1].E[j])){
+						result = result.concat(data.states[result[i]-1].E[j]);
+					}else{
+						return result;
+					}
+					//console.log(result);
 				}
 			}
 		}
@@ -92,21 +98,21 @@ addState = function(state){
 
 getTranStates = function(){
 	for(var i = 0; dfa.states.length < data.totalStates; i++){
-		console.log("______ DFA States Loop ______");
-		if(!dfa.states[i].touch){
+		//console.log("______ DFA States Loop ______");
+		if(dfa.states[i] && !dfa.states[i].touch){
 			if(dfa.states[i].s){
 				var result = [];
 				//loop through state list
 				for(var j = 0; j < dfa.states[i].s.length; j++){
-					console.log("		---- DFA states[i].s Loop ---- ");
+					//console.log("		---- DFA states[i].s Loop ---- ");
 					for(var k = 0; k < data.transitionTypes.length-1; k++){
-						console.log("			---- transition Types Loop ---- ");
+						//console.log("			---- transition Types Loop ---- ");
 						if(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]){
 						//var say = data.states[dfa.states[i].s[j]-1].E;
 						//console.log("				->>>> findE:  " + say);
 						//var eList = findE(data.states[dfa.states[i].s[j]-1]);
 						//var eList = findE(dfa.states.s[j]-1);
-							console.log("RESULT PUSH: " + data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
+						//	console.log("RESULT PUSH: " + data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
 							result.push(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
 						//if(eList.length > 0){
 							//result = result.concat(eList);
@@ -122,12 +128,34 @@ getTranStates = function(){
 							tmpResult = tmpResult.concat(findE(result[a][b]));
 						//}
 					}
-					//result[a] = tmpResult;
-					var tmp = {
-						s: tmpResult,
-						touch: false
-					};
-					addState(tmp);
+					
+					//Check to make sure there are not dups
+					var is_inList = false;
+					var cp1 = tmpResult.slice();
+					var dup1 = toString(cp1.sort());
+					for(var o = 0; o < dfa.states.length; o++){
+						var cp2 = dfa.states[o].s.slice();
+						var dup2 = toString(cp2.sort());
+						if(dup1 === dup2){
+							is_inList = true;
+							break;
+						}
+					}
+
+					//add to seen
+					for(var p = 0; p < tmpResult.length; p++){
+						if(dfa.seen.indexOf(tmpResult[p]) === -1){
+							dfa.seen.push(tmpResult[p]);
+						}
+					}
+
+					if(is_inList){
+						var tmp = {
+							s: tmpResult,
+							touch: false
+						};
+						addState(tmp);
+					}
 				}
 
 			}
