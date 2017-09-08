@@ -9,44 +9,69 @@ Adam Ordway
 */
 
 var data = new Object;          // Holds all input file data
-var dfa = new Object;
+var dfa = new Object;			// Holds DFA data
 
 dfa.states = [];
 dfa.seen = [];
+dfa.finalStates = [];
 
+/*****************************
+ *	Main Driver
+ * **************************/
 main = function(){
 	console.log("reading NFA ... done.\n");
 	console.log("creating corresponding DFA ...");	
 	
-	var init = [];//setTranStates(data.initialState);
-	//console.log(init);
+	var init = [];
 	init = init.concat(findE(data.initialState));
 	init.sort(sortNumber);
 	dfa.seen = init;
 	addState(init);
 
 	getTranStates();
-
+	//getFinalStates();
+	console.log(dfa.finalStates);
 	console.log("done.");
 
 }
 
+/*************************
+ *	FindE - Recursively finds states from E
+ ************************/
+var r = {};
+findEi = function(state, inR = false){
+	if(!inR){
+		r.list = [];
+	}
+	if(state){
+	
+		if(data.states[state-1].E){
+			for(var i = 0; i < data.states[state-1].E.length; i++){
+				//if(!r.list.includes(data.states[state-1].E[i])){
+					r.list.push(data.states[state-1].E[i]);
+				//}
+				findE(data.states[state-1].E[i], true);
+			}
+		}
+		
+		if(!inR){
+			return r.list;
+		}
+
+	}else{
+		return null;
+	}
+}
+
 findE = function(state){
-	//console.log('  ----  In FindE  ----  ');
 	var result = [];
 	if(state){
-		//console.log("inner");
 		result.push(state);
-		for(var i = 0; i < result.length; i++){
-			//console.log("inner - 1");
-			if(data.states[result[i]-1].E){
-				//console.log("inner - 1: if");
+		for(var i = 0; i < result.length; i++){ // Loop through array of states
+			if(data.states[result[i]-1].E){ // if state has E values loop through them
 				for(var j = 0; j < data.states[result[i]-1].E.length; j++){
-					//console.log("inner - 2");
-					if(!result.includes(data.states[result[i]-1].E[j])){
+					if(!result.includes(data.states[result[i]-1].E[j])){ // 
 						result = result.concat(data.states[result[i]-1].E[j]);
-					}else{
-						//return result;
 					}
 				}
 			}
@@ -124,6 +149,22 @@ getTranStates = function(){
 	}
 }
 
+getFinalStates = function(){
+	var list = [];
+	for(var i = 0; i < dfa.states.length; i++){
+		if(dfa.states[i].s.includes(data.finalStates)){
+			list.push(i);
+		}
+		/*for(var j = 0; j < dfa.states[i].s.length; j++){
+			if(dfa.states[i].s[j].includes(data.finalStates)){
+				list.push(dfa.states[i].s[j]);
+			}
+		}*/
+	}
+	console.log(list);
+	dfa.finalStates = list;
+}
+
 printDFA = function(){
 	
 }
@@ -133,6 +174,12 @@ addState = function(s){
 		s: s,
 		touch: false
 	};
+	
+	for(var i = 0 ; i < data.finalStates.length; i++){	
+		if(s.includes(data.finalStates[i])){
+			dfa.finalStates.push(dfa.states.length+1);
+		}
+	}
 
 	dfa.states.push(state);
 	console.log("new DFA state:\t" + dfa.states.length + "\t-->\t{" + dfa.states[dfa.states.length - 1].s + "}");
