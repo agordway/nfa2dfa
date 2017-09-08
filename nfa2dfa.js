@@ -21,12 +21,12 @@ main = function(){
 	findE();
 	console.log(JSON.stringify(data));
 	var bool = true;
-	while(bool){
+	//while(bool){
 		console.log("##############################");
 		console.log("Main Loop");
 		console.log("##############################");
 		bool = getTranStates();
-	}
+	//}
 
 	console.log("done.");
 
@@ -52,9 +52,21 @@ findE = function(state){
 			};
 			addState(tmp);
 		}
-	}else if(data.states[state-1].E){
-		console.log("state.E	****    " + data.states[state-1].E );
-		result = result.concat(data.states[state-1].E);
+	}else if(state){
+
+		result.push(state);
+
+		for(var i = 0; i < result.length; i++){
+			if(data.states[result[i]-1].E){
+				for(var j = 0; j < data.states[result[i]-1].E.length; j++){
+					result = result.concat(data.states[result[i]-1].E[j]);
+				}
+			}
+		}
+
+		/*for(var s = 0; s < state.length; s++){
+			result = result.concat(data.states[state-1].E);
+		}
 		console.log("result before recursion: " + result);
 		for(var i = 0; i < result.length; i++){
 			if(data.states[result[i]-1]){
@@ -63,7 +75,8 @@ findE = function(state){
 				}
 			}
 		}
-		console.log("result after recursion: " + result);
+		console.log("result after recursion: " + result);*/
+
 		return result;
 	}else{
 		return null;
@@ -80,53 +93,48 @@ getTranStates = function(){
 		console.log("______ DFA States Loop ______");
 		if(!dfa.states[i].touch){
 			if(dfa.states[i].s){
-			var tmpResult = [];
-			var result = [];
-			//loop through state list
-			for(var j = 0; j < dfa.states[i].s.length; j++){
-				console.log("		---- DFA states[i].s Loop ---- ");
-				for(var k = 0; k < data.transitionTypes.length-1; k++){
-					console.log("			---- transition Types Loop ---- ");
-					if(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]){
+				var result = [];
+				//loop through state list
+				for(var j = 0; j < dfa.states[i].s.length; j++){
+					console.log("		---- DFA states[i].s Loop ---- ");
+					for(var k = 0; k < data.transitionTypes.length-1; k++){
+						console.log("			---- transition Types Loop ---- ");
+						if(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]){
 						//var say = data.states[dfa.states[i].s[j]-1].E;
 						//console.log("				->>>> findE:  " + say);
 						//var eList = findE(data.states[dfa.states[i].s[j]-1]);
 						//var eList = findE(dfa.states.s[j]-1);
-						console.log("RESULT PUSH: " + data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
-						result.push(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
+							console.log("RESULT PUSH: " + data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
+							result.push(data.states[dfa.states[i].s[j]-1][data.transitionTypes[k]]);
 						//if(eList.length > 0){
 							//result = result.concat(eList);
 							//console.log(eList + "     +++++++");
 						//}
+						}
 					}
 				}
-			}
-
-			for(var a = 0; a < result.length; a++){
-				console.log("sen t=> " + result[a] + " EEEEEEE => + " + data.states[result[a]-1].E);
-				if(findE(result[a])){
-					tmpResult = tmpResult.concat(findE(result[a]));
+				for(var a = 0; a < result.length; a++){
+					tmpResult = [];
+					for(var b = 0; b < result[a].length; b++){
+						//if(findE(result[a][b])){
+							tmpResult = tmpResult.concat(findE(result[a][b]));
+						//}
+					}
+					//result[a] = tmpResult;
+					var tmp = {
+						s: tmpResult,
+						touch: false
+					};
+					addState(tmp);
 				}
-			}
 
-			console.log("TEMP RESULT: " + tmpResult);
-
-			result = result.concat(tmpResult);
-
-			for(var l = 0; l < result.length; l++){
-				var tmp = {
-					s: result[l],
-					touch: false
-				};
-				addState(tmp);
 			}
 			dfa.states[i].touch = true;
-			}
 		}else{
-			return false;
+			break;
 		}
 	}
-	return true;
+	return false;
 }
 
 printDFA = function(){
