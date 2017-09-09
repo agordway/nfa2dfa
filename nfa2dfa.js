@@ -30,8 +30,9 @@ main = function(){
 
 	getTranStates();
 	//getFinalStates();
-	console.log(dfa.finalStates);
 	console.log("done.");
+
+	printDFA();
 
 }
 
@@ -155,18 +156,39 @@ getFinalStates = function(){
 		if(dfa.states[i].s.includes(data.finalStates)){
 			list.push(i);
 		}
-		/*for(var j = 0; j < dfa.states[i].s.length; j++){
-			if(dfa.states[i].s[j].includes(data.finalStates)){
-				list.push(dfa.states[i].s[j]);
-			}
-		}*/
 	}
-	console.log(list);
 	dfa.finalStates = list;
+}
+
+move = function(states, type){
+	for(var i = 0; i < states.length; i++){
+		if(data.states[states[i]-1][type]){
+			return data.states[states[i]-1][type];
+		}
+	}
+	return "";
 }
 
 printDFA = function(){
 	
+	console.log("\nfinal DFA:");
+	console.log("Initial State:\t" + data.initialState);
+	console.log("Final States:\t{" + dfa.finalStates + "}");
+	console.log("Total States:\t" + dfa.states.length);
+	process.stdout.write("State");
+	
+	for(var i = 0; i < data.transitionTypes.length-1; i++){
+		process.stdout.write("\t" + data.transitionTypes[i]);
+	}
+		
+	for(var i = 0; i < dfa.states.length; i++){
+		process.stdout.write("\n" + (i+1));
+		for(var j = 0; j < data.transitionTypes.length-1; j++){
+			process.stdout.write("\t{" + move(dfa.states[i].s, data.transitionTypes[j]) + "}");
+		}
+	}
+
+	process.stdout.write("\n");
 }
 
 addState = function(s){
