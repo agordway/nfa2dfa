@@ -161,11 +161,22 @@ getFinalStates = function(){
 }
 
 move = function(states, type){
+	var val = null;
 	for(var i = 0; i < states.length; i++){
 		if(data.states[states[i]-1][type]){
-			return data.states[states[i]-1][type];
+			val =  data.states[states[i]-1][type];
+			break;
 		}
 	}
+	
+	for(var i = 0; i < dfa.states.length; i++){
+		for(var j = 0; j < dfa.states[i].s.length; j++){
+			if(val == dfa.states[i].s[j]){
+				return i+1;
+			}
+		}
+	}
+
 	return "";
 }
 
