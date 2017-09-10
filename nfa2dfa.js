@@ -12,7 +12,6 @@ var data = new Object;          // Holds all input file data
 var dfa = new Object;			// Holds DFA data
 
 dfa.states = [];
-dfa.seen = [];
 dfa.finalStates = [];
 
 /*****************************
@@ -25,11 +24,9 @@ main = function(){
 	var init = [];
 	init = init.concat(findE(data.initialState));
 	init.sort(sortNumber);
-	dfa.seen = init;
 	addState(init);
 
 	getTranStates();
-	//getFinalStates();
 	console.log("done.");
 
 	printDFA();
@@ -39,31 +36,6 @@ main = function(){
 /*************************
  *	FindE - Recursively finds states from E
  ************************/
-var r = {};
-findEi = function(state, inR = false){
-	if(!inR){
-		r.list = [];
-	}
-	if(state){
-	
-		if(data.states[state-1].E){
-			for(var i = 0; i < data.states[state-1].E.length; i++){
-				//if(!r.list.includes(data.states[state-1].E[i])){
-					r.list.push(data.states[state-1].E[i]);
-				//}
-				findE(data.states[state-1].E[i], true);
-			}
-		}
-		
-		if(!inR){
-			return r.list;
-		}
-
-	}else{
-		return null;
-	}
-}
-
 findE = function(state){
 	var result = [];
 	if(state){
@@ -83,63 +55,46 @@ findE = function(state){
 	}
 }
 
-setTranStates = function(state){
+setTranStates = function(state, type){
 	var result = [];
-	if(state.constructor === Array){
-		for(var i = 0; i < state.length; i++){
-			for(var j = 0; j < data.transitionTypes.length-1; j++){
-				if(data.states[state[i]-1][data.transitionTypes[j]]){
-					result.push(data.states[state[i]-1][data.transitionTypes[j]]);
-				}
-			}
-		}
-	}else{
-		for(var j = 0; j < data.transitionTypes.length-1; j++){
-			if(data.states[state-1][data.transitionTypes[j]]){
-				result.push(data.states[state-1][data.transitionTypes[j]]);
-			}
+	for(var i = 0; i < state.length; i++){
+		if(data.states[state[i]-1][type]){
+			result = result.concat(data.states[state[i]-1][type]);
 		}
 	}
-
-		return result;
+	return result;
 }
 
 getTranStates = function(){
-	for(var i = 0; dfa.seen.length < data.totalStates; i++){
-		//console.log("______ DFA States Loop ______");
+	for(var i = 0; true; i++){
 		if(dfa.states[i] && !dfa.states[i].touch){
 			if(dfa.states[i].s){
-				var result = [];
-				//loop through state list
-				result = result.concat(setTranStates(dfa.states[i].s));
-
-				for(var a = 0; a < result.length; a++){
-					tmpResult = [];
-					for(var b = 0; b < result[a].length; b++){
-						tmpResult = tmpResult.concat(findE(result[a][b]));
-					}
-					
-					//Check to make sure there are not dups
-					tmpResult.sort(sortNumber);
-					var is_inList = false;
-					for(var o = 0; o < dfa.states.length; o++){		//search for dups dfa.states
-						if(tmpResult.equals(dfa.states[o].s)){
-							is_inList = true;
-							break;
+				for(var t = 0; t < data.transitionTypes.length-1; t++){
+					var result = setTranStates(dfa.states[i].s, data.transitionTypes[t]);
+					if(result.length > 0){
+						var tmpResult = [];
+						for(var b = 0; b < result.length; b++){
+							tmpResult = tmpResult.concat(findE(result[b]));
 						}
-					}
-					
-					//If not a dup
-					if(!is_inList){
-						//add to seen
-						dfa.seen = dfa.seen.concat(tmpResult);
-						dfa.seen = dfa.seen.filter(function(i, p){
-							return dfa.seen.indexOf(i) == p;
+
+						tmpResult = tmpResult.filter(function(i, p){
+							return tmpResult.indexOf(i) == p;
 						});
 
-						addState(tmpResult);
+						//Check to make sure there are not dups
+						tmpResult.sort(sortNumber);
+						var is_inList = false;
+						for(var o = 0; o < dfa.states.length; o++){		//search for dups dfa.states
+							if(tmpResult.equals(dfa.states[o].s)){
+								is_inList = true;
+								break;
+							}
+						}
+						//If not a dup
+						if(!is_inList){
+							addState(tmpResult);
+						}
 					}
-
 				}
 
 			}
@@ -148,16 +103,6 @@ getTranStates = function(){
 			break;
 		}
 	}
-}
-
-getFinalStates = function(){
-	var list = [];
-	for(var i = 0; i < dfa.states.length; i++){
-		if(dfa.states[i].s.includes(data.finalStates)){
-			list.push(i);
-		}
-	}
-	dfa.finalStates = list;
 }
 
 move = function(states, type){
@@ -209,7 +154,7 @@ addState = function(s){
 	};
 	
 	for(var i = 0 ; i < data.finalStates.length; i++){	
-		if(s.includes(data.finalStates[i])){
+		if(s.includes(data.finalStates[i]) && !dfa.finalStates.includes(dfa.states.length+1)){
 			dfa.finalStates.push(dfa.states.length+1);
 		}
 	}
