@@ -105,7 +105,52 @@ getTranStates = function(){
 	}
 }
 
+arrayInArray = function(org, sub){
+	
+	if(sub.length == 0){
+		return false;
+	}
+	
+	var tmp = [];
+	for(var i = 0; i < sub.length; i++){
+		if(org.includes(sub[i])){
+			tmp.push(sub[i]);
+		}
+	}
+
+	if(tmp.length == sub.length && tmp.length == org.length){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 move = function(states, type){
+
+	var val = [];
+	for(var i = 0; i < states.length; i++){
+		if(data.states[states[i]-1][type]){
+			val = val.concat(data.states[states[i]-1][type]);
+		}
+	}
+
+	fval = [];
+	for(var i = 0; i < val.length; i++){
+			fval = fval.concat(findE(val[i]));
+	}
+
+	fval = fval.filter(function(i, p){
+		return fval.indexOf(i) == p;
+	});
+	
+	for(var i = 0; i < dfa.states.length; i++){
+		if(arrayInArray(dfa.states[i].s, fval)){
+			return i+1;
+		}
+	}
+
+
+	/*
 	var val = null;
 	for(var i = 0; i < states.length; i++){
 		if(data.states[states[i]-1][type]){
@@ -120,7 +165,7 @@ move = function(states, type){
 				return i+1;
 			}
 		}
-	}
+	}*/
 
 	return "";
 }
