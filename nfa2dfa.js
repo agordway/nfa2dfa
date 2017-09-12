@@ -26,7 +26,7 @@ main = function(){
 	init.sort(sortNumber);
 	addState(init);
 
-	getTranStates();
+	storeDFA();
 	console.log("done.");
 
 	printDFA();
@@ -34,7 +34,7 @@ main = function(){
 }
 
 /*************************
- *	FindE - Recursively finds states from E
+ *	FindE - finds states from E
  ************************/
 findE = function(state){
 	var result = [];
@@ -65,7 +65,8 @@ setTranStates = function(state, type){
 	return result;
 }
 
-getTranStates = function(){
+//creates the dfa
+storeDFA = function(){
 	for(var i = 0; true; i++){
 		if(dfa.states[i] && !dfa.states[i].touch){
 			if(dfa.states[i].s){
@@ -105,6 +106,7 @@ getTranStates = function(){
 	}
 }
 
+//checks to see if an array's elements are in another array
 arrayInArray = function(org, sub){
 	
 	if(sub.length == 0){
@@ -125,6 +127,7 @@ arrayInArray = function(org, sub){
 	}
 }
 
+//gets the proper state
 move = function(states, type){
 
 	var val = [];
@@ -149,27 +152,10 @@ move = function(states, type){
 		}
 	}
 
-
-	/*
-	var val = null;
-	for(var i = 0; i < states.length; i++){
-		if(data.states[states[i]-1][type]){
-			val =  data.states[states[i]-1][type];
-			break;
-		}
-	}
-	
-	for(var i = 0; i < dfa.states.length; i++){
-		for(var j = 0; j < dfa.states[i].s.length; j++){
-			if(val == dfa.states[i].s[j]){
-				return i+1;
-			}
-		}
-	}*/
-
 	return "";
 }
 
+//Prints the final dfa
 printDFA = function(){
 	
 	console.log("\nfinal DFA:");
@@ -192,6 +178,7 @@ printDFA = function(){
 	process.stdout.write("\n");
 }
 
+// Adds states to the dfa and prints them
 addState = function(s){
 	var state = {
 		s: s,
@@ -208,6 +195,7 @@ addState = function(s){
 	console.log("new DFA state:\t" + dfa.states.length + "\t-->\t{" + dfa.states[dfa.states.length - 1].s + "}");
 }
 
+//Seperates lists from input
 parseList = function(string){
 	if(string == '{}'){
 		return null;
@@ -221,6 +209,7 @@ sortNumber = function(a,b){
 	return a - b;
 }
 
+// Compares arrays
 Array.prototype.equals = function(a){
 	if(!a){
 		return false;
@@ -241,6 +230,8 @@ Array.prototype.equals = function(a){
 }
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
+
+//Reads the input file and stores everything
 setData = function(data){
 	
     var readline = require('readline');
